@@ -13,10 +13,10 @@ pipeline {
 
     stages {
 
-        // 1. Checkout source code
+        // 1. Checkout SCM
         stage('Checkout SCM') {
             steps {
-                echo 'Checking out source code from Git...'
+                echo 'Checking out source code...'
                 checkout scm
             }
         }
@@ -32,13 +32,10 @@ pipeline {
         // 3. Static Verification
         stage('Static Verification') {
             steps {
-                echo 'Checking Java and Maven configuration...'
+                echo 'Checking Java and Maven...'
 
                 bat 'java -version'
-                bat 'where mvn'
                 bat 'mvn -version'
-
-                echo 'Validating Maven POM...'
                 bat 'mvn validate'
             }
         }
@@ -46,7 +43,7 @@ pipeline {
         // 4. Compilation
         stage('Compilation') {
             steps {
-                echo 'Compiling Simple Calculator...'
+                echo 'Compiling calculator project...'
                 bat 'mvn clean compile'
             }
         }
@@ -54,7 +51,7 @@ pipeline {
         // 5. Automated Testing
         stage('Automated Testing') {
             steps {
-                echo 'Executing JUnit 5 tests...'
+                echo 'Running JUnit tests...'
                 bat 'mvn test'
             }
         }
@@ -62,10 +59,19 @@ pipeline {
         // 6. Recording Test Results
         stage('Recording Test Results') {
             steps {
-                echo 'Publishing JUnit test reports...'
+                echo 'Checking generated test reports...'
+
+                bat '''
+                    if not exist target\\surefire-reports (
+                        echo ERROR: Test reports folder not found!
+                        exit /b 1
+                    )
+
+                    dir target\\surefire-reports
+                '''
 
                 junit(
-                    testResults: '**/target/surefire-reports/TEST-*.xml',
+                    testResults: 'target/surefire-reports/TEST-*.xml',
                     allowEmptyResults: false
                 )
             }
@@ -74,15 +80,15 @@ pipeline {
 
     post {
         success {
-            echo 'SUCCESS: Simple Calculator built and tested successfully!'
+            echo 'SUCCESS: Calculator project built and tested!'
         }
 
         failure {
-            echo 'FAILURE: Check Console Output for errors.'
+            echo 'FAILURE: Please check Console Output.'
         }
 
         always {
-            echo 'Pipeline execution completed.'
+            echo 'Jenkins pipeline execution completed.'
         }
     }
 }
