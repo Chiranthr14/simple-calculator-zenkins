@@ -1,46 +1,83 @@
+
 pipeline {
     agent any
+
     tools {
         jdk 'JDK 25'
         maven 'Maven-3.10'
-}
+    }
+
+    options {
+        timestamps()
+    }
 
     stages {
+
+        stage('Checkout SCM') {
+            steps {
+                echo 'Checking out source code...'
+                checkout scm
+            }
+        }
+
         stage('SCM Synchronization') {
             steps {
-                echo '📥 Pulling latest code changes from Git repository...'
-                checkout scm
+                echo 'Source code synchronization completed.'
+                bat 'git status'
             }
         }
 
         stage('Static Verification') {
             steps {
-                echo '🔍 Checking Maven project layout rules...'
+                echo 'Checking Maven project layout rules...'
+
+                bat 'where java'
+                bat 'java -version'
+
+                bat 'where mvn'
+                bat 'mvn -version'
+
                 bat 'mvn validate'
             }
         }
 
-        stage('Compilation & Automated Testing') {
+        stage('Compilation') {
             steps {
-                echo '⚙️ Compiling class layers and verifying test logic stability...'
-                bat 'mvn clean package'
+                echo 'Compiling calculator project...'
+                bat 'mvn clean compile'
             }
-            post {
-                always {
-                    echo '📊 Publishing Unit Test trends to Jenkins Dashboard...'
-                    junit '**/target/surefire-reports/*.xml'
-                }
+        }
+
+        stage('Automated Testing') {
+            steps {
+                echo 'Running JUnit automated tests...'
+                bat 'mvn test'
+            }
+        }
+
+        stage('Recording Test Results') {
+            steps {
+                echo 'Publishing JUnit test reports...'
+
+                junit(
+                    testResults: '**/target/surefire-reports/TEST-*.xml',
+                    allowEmptyResults: false
+                )
             }
         }
     }
 
     post {
         success {
-            echo '✅ CI Pipeline completed flawlessly! Code stability confirmed.'
+            echo 'SUCCESS: Calculator project built and tested successfully!'
         }
+
         failure {
-            echo '❌ CI Pipeline broken. Check console logs for build failures or breaking test regressions.'
+            echo 'FAILED: Please check the Jenkins console output.'
+        }
+
+        always {
+            echo 'Jenkins pipeline execution completed.'
         }
     }
 }
-
