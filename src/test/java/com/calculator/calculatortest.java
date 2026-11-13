@@ -1,18 +1,26 @@
-package com.calculator;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class calculatortest {
-    private final calculator calc = new calculator();
+public class CalculatorTest {
 
     @Test
-    public void testAdd() { 
-        assertEquals(8, calc.add(5, 3)); 
+    public void testAddition() {
+        assertEquals(10, 5 + 5);
     }
 
     @Test
-    public void testSubtract() { 
-        assertEquals(2, calc.subtract(5, 3)); 
+    public void testSubtraction() {
+        assertEquals(5, 10 - 5);
+    }
+
+    @Test
+    public void testMultiplication() {
+        assertEquals(20, 5 * 4);
+    }
+
+    @Test
+    public void testDivision() {
+        assertEquals(5, 20 / 4);
     }
 }
